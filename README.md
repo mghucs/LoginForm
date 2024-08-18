@@ -1,0 +1,1 @@
+Create your own database.config file in src/main/resources which contain your database url and credentials
