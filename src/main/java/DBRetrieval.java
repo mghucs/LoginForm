@@ -11,7 +11,6 @@ public class DBRetrieval {
 		try {
 			Properties prop = new Properties();
 
-
 			InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.config");
 
 	        prop.load(inputStream);
