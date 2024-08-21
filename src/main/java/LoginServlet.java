@@ -6,9 +6,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.sql.Connection;
@@ -20,9 +18,7 @@ import java.util.Base64;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-/**
- * Servlet implementation class HelloServlet
- */
+
 @WebServlet("/loginServlet")
 public class LoginServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -37,13 +33,12 @@ public class LoginServlet extends HttpServlet {
 
 		Connection connection = DBRetrieval.getConnection();
 		try {
-			PreparedStatement preparedStatement = connection.prepareStatement("SELECT salt, password_hash, balance FROM logininfo");
+			PreparedStatement preparedStatement = connection.prepareStatement("SELECT salt, password_hash, balance FROM logininfo"
+					+ " WHERE username = ?");
+			preparedStatement.setString(1, username);
 	        ResultSet result = preparedStatement.executeQuery();
 
-			PrintWriter writer = response.getWriter();
-			
-			while(result.next()) {
-				
+			if (result.next()) {
 				Base64.Decoder dec = Base64.getDecoder();
 				byte[] salt = dec.decode(result.getString("salt"));
 				byte[] password_hash = dec.decode(result.getString("password_hash"));
@@ -54,14 +49,16 @@ public class LoginServlet extends HttpServlet {
 				byte[] input_password_hash = factory.generateSecret(spec).getEncoded();
 				
 		        if (Arrays.equals(input_password_hash, password_hash)) {
-					writer.println("<h1>Your balance is " + result.getString("balance") + "</h1>");
+					request.setAttribute("username", username);
+					request.setAttribute("balance", result.getInt("balance"));
+					request.getRequestDispatcher("/welcome.jsp").forward(request, response);
 		        }
-		        else writer.println("Wrong credentials");
 			}
-			writer.close();
+			else {
+				response.sendRedirect(request.getContextPath() + "/wrongcredentials.jsp");
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			response.getWriter().println("Error");
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		} catch (InvalidKeySpecException e) {

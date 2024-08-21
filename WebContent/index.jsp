@@ -8,11 +8,13 @@
 </head>
 <body>
 	<div align="center">
-	<form name="loginForm" method="post" action="loginServlet">
-		Username: <input type="text" name="username"/> <br/>
-		Password: <input type="password" name="password"/> <br/>
-		<input type="submit" value="Login" />
-	</form>
+		<h1>Login to your account</h1>
+		<form name="loginForm" method="post" action="loginServlet">
+			Username: <input type="text" name="username"/> <br/>
+			Password: <input type="password" name="password"/> <br/>
+			<input type="submit" value="Login" />
+		</form>
+		<h1> <a href="signup.jsp">Create your account</a></h1> 
 	</div>
 </body>
 </html>
