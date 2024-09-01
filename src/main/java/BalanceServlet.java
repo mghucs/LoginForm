@@ -36,34 +36,48 @@ public class BalanceServlet extends HttpServlet {
 		Connection connection = DBRetrieval.getConnection();
 		
 		try {
-			PreparedStatement preparedStatement = connection
-					.prepareStatement("UPDATE accountlogin.logininfo" +
-				" SET balance = balance + ? WHERE username = ?");
-			
-			preparedStatement.setString(2, username);
-			if (request.getParameter("deposit") != null) {
-				preparedStatement.setBigDecimal(1, amount);
-			}
-			else if (request.getParameter("withdraw") != null) {
 
-				preparedStatement.setBigDecimal(1, amount.negate());
-			}
-			preparedStatement.executeUpdate();
+			HttpSession session = request.getSession();
 
-			preparedStatement = connection
-					.prepareStatement("SELECT balance FROM logininfo" + " WHERE username = ?");
+			PreparedStatement preparedStatement = connection.prepareStatement("SELECT balance FROM logininfo" + " WHERE username = ?");
 			preparedStatement.setString(1, username);
 			
 			ResultSet result = preparedStatement.executeQuery();
 
 			if (result.next()) {
-				HttpSession session = request.getSession();
-				session.setAttribute("username", username);
-				session.setAttribute("balance", result.getDouble("balance"));
-				response.sendRedirect(request.getContextPath() + "/welcome.jsp");
+				BigDecimal balance = result.getBigDecimal("balance");
+
+				preparedStatement = connection
+						.prepareStatement("UPDATE accountlogin.logininfo" +
+					" SET balance = balance + ? WHERE username = ?");
+				
+				preparedStatement.setString(2, username);
+				if (request.getParameter("deposit") != null) {
+					preparedStatement.setBigDecimal(1, amount);
+				}
+				else if (request.getParameter("withdraw") != null) {
+					if (balance.add(amount.negate()).compareTo(BigDecimal.ZERO) == -1) {
+						session.setAttribute("insufficient", true);
+						preparedStatement.setBigDecimal(1, BigDecimal.ZERO);
+					}
+					else preparedStatement.setBigDecimal(1, amount.negate());
+				}
+				
+				preparedStatement.executeUpdate();
+
+				preparedStatement = connection
+						.prepareStatement("SELECT balance FROM logininfo" + " WHERE username = ?");
+				preparedStatement.setString(1, username);
+				result = preparedStatement.executeQuery();
+
+				if (result.next()) {
+					session.setAttribute("username", username);
+					session.setAttribute("balance", result.getDouble("balance"));
+					response.sendRedirect(request.getContextPath() + "/welcome.jsp");
+				}
 			}
+			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

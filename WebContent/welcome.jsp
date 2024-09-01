@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -62,6 +63,10 @@
     		<button type="submit" name="deposit">Deposit</button>
     		<button type="submit" name="withdraw">Withdraw</button>
 		</form>
+		<c:if test="${sessionScope.insufficient}">
+			<h2 style="color:red">Insufficient funds</h2> 
+    		<c:remove var="insufficient"/>
+		</c:if>
 		<h1><a href="index.jsp">Logout</a></h1>
 		<h1>
 			<form action="DeleteServlet" method="post">
