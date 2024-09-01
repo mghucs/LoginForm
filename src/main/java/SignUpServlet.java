@@ -5,6 +5,8 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -39,8 +41,10 @@ public class SignUpServlet extends HttpServlet {
 					+ " WHERE username = ?");
 			preparedStatement.setString(1, username);
 			ResultSet result = preparedStatement.executeQuery();
+			HttpSession session = request.getSession();
 			if (result.next()) {
-				response.sendRedirect(request.getContextPath() + "/alreadycreated.jsp");
+				session.setAttribute("created", true);
+				response.sendRedirect(request.getContextPath() + "/signup.jsp");
 				return;
 			}
 			
@@ -58,16 +62,15 @@ public class SignUpServlet extends HttpServlet {
 			
 			Base64.Encoder enc = Base64.getEncoder();
 			
-			int balance = rand.nextInt(1000);
 			preparedStatement.setString(1, username);
 			preparedStatement.setString(2, enc.encodeToString(salt));
 			preparedStatement.setString(3, enc.encodeToString(password_hash));
-			preparedStatement.setInt(4, balance);
+			preparedStatement.setInt(4, 0);
 			preparedStatement.executeUpdate();
 
-			request.setAttribute("username", username);
-			request.setAttribute("balance", balance);
-			request.getRequestDispatcher("/welcome.jsp").forward(request, response);
+			session.setAttribute("username", username);
+			session.setAttribute("balance", 0);
+			response.sendRedirect(request.getContextPath() + "/welcome.jsp");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} catch (NoSuchAlgorithmException e) {

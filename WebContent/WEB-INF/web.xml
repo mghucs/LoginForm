@@ -39,4 +39,14 @@
     <servlet-name>DeleteServlet</servlet-name>
     <url-pattern>/DeleteServlet</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>BalanceServlet</display-name>
+    <servlet-name>BalanceServlet</servlet-name>
+    <servlet-class>BalanceServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>BalanceServlet</servlet-name>
+    <url-pattern>/BalanceServlet</url-pattern>
+  </servlet-mapping>
 </web-app>
